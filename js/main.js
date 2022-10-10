@@ -3,7 +3,7 @@
  */
 
 // BASEMAPS
-var map = L.map('map').setView([-1.35, 29.53], 7);
+var map = L.map('map').setView([-0.45, 32.0], 7);
 var topographicLayer = L.esri.basemapLayer("Topographic").addTo(map);
 var osmLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
