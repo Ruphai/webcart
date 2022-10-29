@@ -4,117 +4,70 @@
 
 // BASEMAPS
 var map = L.map('map').setView([-0.45, 32.0], 7);
+
 var topographicLayer = L.esri.basemapLayer("Topographic").addTo(map);
 var osmLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
 });
-var baseMaps = {
+
+var BaseMaps = {
     "OpenStreetMap": osmLayer,
 	"Topographic": topographicLayer
 };
 
-//LOAD SHAPEFILES
-var BaseStyle = {
- 	"color": "#666699",
- 	"fillColor": "#ffffff",
-     "weight": 1,
-     "opacity": 0.2
- };
+//set dynamic styling
+var LogBreaks = [0.01, 0, 1, 3, 6, 10, 20, 30, 50, 100]
+var Colors = ["#fff7ec", "#fee8c8", "#fdd49e", "#fdbb84", "#fc8d59", "#ef6548", "#d7301f", "#b30000", "#7f0000"];
 
-//  #ffffcc
-//  #a1dab4
-//  #41b6c4
-//  #2c7fb8
-//  #253494
-
-// Set dynamic styling
-// let SudBreaks = [0.090000, 3.770000, 11.460000, 27.680000, 44.850000, 54.290000];
-// let SudColors = ["#fef0d9", "#fdcc8a", "#fc8d59", "#e34a33", "#b30000"];
-// function baseColor(d) {
-//     for(let i = 1; i < SudBreaks.length; i++) {
-//         if(d > SudBreaks[i] && d <= SudBreaks[i+1]) {
-//             return SudColors[i];
-//         }
-//     }
-// }
-
- function SudBaseColor(p) {
-    if(p > 44.850000) return "#fef0d9";
-    if(p > 27.680000) return "#fdcc8a";
-    if(p > 11.460000) return "#fc8d59";
-    if(p > 3.770000) return "#e34a33";
-    if(p > 0.090000) return "#b30000";
-    return "grey";
+function ShapeColor(d) {
+    for(let i = 1; i < LogBreaks.length; i++) {
+        if(d > LogBreaks[i] && d <= LogBreaks[i+1]) {
+            return Colors[i];
+        }
+    }
 }
 
- function SudBaseStyle (feature) {
+function SudBaseStyle (feature) {
     return {
-        fillColor: SudBaseColor(feature.properties.idp_perc), 
-        fillOpacity: 0.7, 
-        color: "black", 
-        weight: 0.3, 
+        fillColor: ShapeColor(feature.properties.idp_perc),
+        fillOpacity: 0.7,
+        color: "black",
+        weight: 0.3,
         opacity: 1
     }
 }
 
-function NordBaseColor(p) {
-    if(p > 32.410000) return "#fef0d9";
-    if(p > 22.260000) return "#fdcc8a";
-    if(p > 15.280000) return "#fc8d59";
-    if(p > 6.730000) return "#e34a33";
-    if(p > 0.000000) return "#b30000";
-    return "grey";
-}
-
- function NordBaseStyle (feature) {
+function NordBaseStyle (feature) {
     return {
-        fillColor: NordBaseColor(feature.properties.idp_perc), 
-        fillOpacity: 0.7, 
-        color: "black", 
-        weight: 0.3, 
+        fillColor: ShapeColor(feature.properties.idp_perc),
+        fillOpacity: 0.7,
+        color: "black",
+        weight: 0.3,
         opacity: 1
     }
 }
 
-function BurundiBaseColor(p) {
-    if(p > 6.180000) return "#fef0d9";
-    if(p > 1.701000) return "#fdcc8a";
-    if(p > 0.893000) return "#fc8d59";
-    if(p > 0.372000) return "#e34a33";
-    if(p > 0.000000) return "#b30000";
-    return "grey";
-}
-
- function BurundiBaseStyle (feature) {
+function BurundiBaseStyle (feature) {
     return {
-        fillColor: BurundiBaseColor(feature.properties.pop_perc), 
-        fillOpacity: 0.7, 
-        color: "black", 
-        weight: 0.3, 
+        fillColor: ShapeColor(feature.properties.pop_perc),
+        fillOpacity: 0.7,
+        color: "black",
+        weight: 0.3,
         opacity: 1
     }
 }
 
-function UgandaBaseColor(p) {
-    if(p > 9.500000) return "#fef0d9";
-    if(p > 7.700000) return "#fdcc8a";
-    if(p > 5.800000) return "#fc8d59";
-    if(p > 5.700000) return "#e34a33";
-    if(p > 0.000000) return "#b30000";
-    return "grey";
-}
-
- function UgandaBaseStyle (feature) {
+function UgandaBaseStyle (feature) {
     return {
-        fillColor: UgandaBaseColor(feature.properties.pop_perc), 
-        fillOpacity: 0.7, 
-        color: "black", 
-        weight: 0.3, 
+        fillColor: ShapeColor(feature.properties.pop_perc),
+        fillOpacity: 0.7,
+        color: "black",
+        weight: 0.3,
         opacity: 1
     }
 }
+
 // UTILITY FUNCTIONS
-
 function formatNumber(num) {
     return num
         .toString()
@@ -132,7 +85,7 @@ function reset_highlight(e) {
 
 // DISPLAYED LAYERS
 var BurundiBoundary = L.geoJson(Burundi, {
-    style: BurundiBaseStyle, 
+    style: BurundiBaseStyle,
     onEachFeature: function(feature, layer) {
         layer.bindPopup(
             '<div class="popup">' +
@@ -142,11 +95,26 @@ var BurundiBoundary = L.geoJson(Burundi, {
                 "Total Population: " + formatNumber(Math.round(feature.properties.bdi_admpop_2022_adm2_v3_T_TL)) +
             '</div>'
             );
-        layer.addEventListener("click", highlight_feature);
-        layer.addEventListener("mouseout", reset_highlight);
+
+        // layer.on({
+        //     mouseover: function() {
+        //         layer.openPopup();
+        //         this.setStyle({
+        //             weight: 3,
+        //             color: "yellow", 
+        //             fillOpacity: 0.01
+        //         })
+        //     }, 
+        //     mouseout: function(){
+        //         layer.closePopup();
+        //         this.setStyle({
+        //             color: 'grey',
+        //             fillOpacity: 0
+        //         })
+        //     }
+        // })
     }
 });
-
 BurundiBoundary.addTo(map);
 
 var UgandaBoundary = L.geoJson(Uganda, {
@@ -160,46 +128,83 @@ var UgandaBoundary = L.geoJson(Uganda, {
                 "Total Population: " + formatNumber(Math.round(feature.properties.uga_admpop_adm2_2022_T_TL)) +
             '</div>'
         );
-        layer.addEventListener("click", highlight_feature);
-        layer.addEventListener("mouseout", reset_highlight);
+        // layer.on({
+        //     mouseover: function() {
+        //         layer.openPopup();
+        //         this.setStyle({
+        //             weight: 3,
+        //             color: "yellow", 
+        //             fillOpacity: 0.01
+        //         })
+        //     }, 
+        //     mouseout: function(){
+        //         layer.closePopup();
+        //         this.setStyle({
+        //             color: 'grey', 
+        //             fillOpacity: 0
+        //         })
+        //     }
+        // })
     }
 });
 UgandaBoundary.addTo(map);
 
-var RwandaBoundary = L.geoJson(Rwanda, {
-    style: BaseStyle,
-    onEachFeature: function(feature, layer) {
-        layer.bindPopup(
-            '<div class="popup">' +
-                "Name: " + feature.properties.name + "<br>" + 
-                "Total Population: " + feature.properties.population);
-        layer.addEventListener("click", highlight_feature);
-        layer.addEventListener("mouseout", reset_highlight);
-    }
-});
-RwandaBoundary.addTo(map);
-
-// fetch("data/Sud_Kivu.geojson") 
-//     .then(function(response) {
-//         return response.json();
-//     })
-//     .then(function(data) {
-//         L.geoJSON(data, {style: baseStyle}).addTo(map);
-//     });
-
 var SudKivuBoundary = L.geoJson(Sud_Kivu, {
     style: SudBaseStyle, 
     onEachFeature: function(feature, layer) {
-        layer.bindPopup(
-            '<div class="popup">' +
-                "Name: " + feature.properties.name + "<br>" + 
-                "Population Percentage: " + feature.properties.idp_perc + "%" +"<br>" +
-                "Affected Population: " + formatNumber(Math.round(feature.properties.pd_is_dans)) + "<br>" + 
-                "Total Population: " + formatNumber(Math.round(feature.properties.population)) +
-            '</div>'
-        );
-        layer.addEventListener("click", highlight_feature);
-        layer.addEventListener("mouseout", reset_highlight);
+        var div = $("<div class='popup'>" + //style='width: 200px; height: 200px;'
+                    'Name: ' + feature.properties.name + '<br>' +
+                    'Population Percentage: ' + feature.properties.idp_perc + '%' + '<br>' +
+                    'Affected Population: ' + formatNumber(Math.round(feature.properties.pd_is_dans)) + '<br>' + 
+                    'Total Population: ' + formatNumber(Math.round(feature.properties.population)) +
+                    "<svg/></div>")[0]
+        layer.bindPopup(div);
+
+        // if ( feature.properties.name==="Fizi") {
+        //     const margin = 5;
+        //     const width = 100 - 2 * margin;
+        //     const height = 100 - 2 * margin;
+
+        //     var svg = d3.select("div").select("svg")
+        //     const chart = svg.append('g')
+        //         .attr("transform", `translate(${margin}, ${margin})`);
+        //     const yScale = d3.scaleLinear()
+        //         .range([height, 0])
+        //         .domain([0, 100])
+        //     chart.append('g')
+        //         .call(d3.axisLeft(yScale));
+            
+        //     const xScale = d3.scaleBand()
+        //         .range([0, width])
+        //         .domain(sample.map((s) => s.territoire))
+        //         .padding(0.2)
+
+        //     // chart.append('g')
+        //     //     .attr('transform', `translate(0, ${height})`)
+        //     //     .call(d3.axisBottom(xScale))
+
+        //     // var svg = d3.select("div").select("svg").attr("width", 200).attr("height", 200);
+        //     // svg.append("rect").attr("width", 200).attr("height", 200).style("fill", "lightBlue");
+        //     // var yScale = d3.scaleLinear().range([100, 0]).domain([0, 100]);
+
+        // };
+        // layer.on({
+        //     mouseover: function() {
+        //         layer.openPopup();
+        //         this.setStyle({
+        //             weight: 3,
+        //             color: "yellow", 
+        //             fillOpacity: 0.01
+        //         })
+        //     }, 
+        //     mouseout: function(){
+        //         layer.closePopup();
+        //         this.setStyle({
+        //             color: 'grey',
+        //             fillOpacity: 0
+        //         })
+        //     }
+        // })
     }
 });
 SudKivuBoundary.addTo(map);
@@ -215,96 +220,52 @@ var NordKivuBoundary = L.geoJson(Nord_Kivu, {
                 "Total Population: " + formatNumber(Math.round(feature.properties.Population)) +
             '</div>'
         );
-        layer.addEventListener("click", highlight_feature);
-        layer.addEventListener("mouseout", reset_highlight);
+        // layer.on({
+        //     mouseover: function() {
+        //         layer.openPopup();
+        //         this.setStyle({
+        //             weight: 3,
+        //             color: "yellow", 
+        //             fillOpacity: 0.01
+        //         })
+        //     }, 
+        //     mouseout: function(e){
+        //         layer.closePopup();
+        //         this.setStyle({
+        //             NordBaseStyle
+        //         });
+        //     }
+        // })
     }
 });
 NordKivuBoundary.addTo(map);
 
-// Set the Style of the Park Elements
-var parkStyle = {
-    "color": "#31B404", 
-    "weight": 3,
-    "opacity": 0.90
-};
-
 // SET LEGEND
 var legend = L.control({position: "bottomleft"});
-
 legend.onAdd = function() {
     var div = L.DomUtil.create("div", "legend");
     div.innerHTML = 
         '<b>IDP Population Percentage</b><br>' +
-        '<div style=background-color:#fef0d9></div>44.850000% - 54.290000%<br>' +
-        '<div style=background-color:#fdcc8a></div>27.680000% - 44.850000%<br>' +
-        '<div style=background-color:#fc8d59></div>11.460000% - 27.680000%<br>' +
-        '<div style=background-color:#e34a33></div>3.770000% - 11.460000%<br>' +
-        '<div style=background-color:#b30000></div>0.090000% - 3.770000%<br>' +
-        '<div style=background-color:#808080></div> NA<br>';
+        '<div style=background-color:#fff7ec></div>0.01% - 0%<br>' +
+        '<div style=background-color:#fee8c8></div>0% - 1%<br>' +
+        '<div style=background-color:#fdd49e></div>1% - 3%<br>' +
+        '<div style=background-color:#fdbb84></div>3% - 6%<br>' +
+        '<div style=background-color:#fc8d59></div>6% - 10%<br>' +
+        '<div style=background-color:#ef6548></div>10% - 20%<br>' +
+        '<div style=background-color:#d7301f></div>20% - 30%<br>' +
+        '<div style=background-color:#b30000></div>30% - 50%<br>' +
+        '<div style=background-color:#7f0000></div> 50% - 100%<br>' +
+        '<div style=background-color:#808080></div> NULL <br>';
     return div;
-    }
+}
 legend.addTo(map)
 
-// Set the Icons of the Parks Elements
-
-// var parkIcon = L.icon({
-//     iconUrl: "./css/images/park_3.svg",
-//     iconSize: [25, 35]
-// });
-
-
-// Call in the Geometry data using the GeoJson method
-// var parksArea = L.geoJson(Parks,
-//     {style:parkStyle});
-// parksArea.addTo(map);
-
-//var clust_mark = L.getMarkerClusterGroup();
-
-
-//Calling in and styling the Park Point Data set using the geoJson method
-// var parksPoint = L.geoJson(parksPoint, { 
-//     pointToLayer: function(feature, latlng) {
-//         return L.marker(latlng, {icon:parkIcon, title:"Leisure Park"});
-//     }, 
-//     onEachFeature: function(feature, layer) {
-//         // if (layer instanceof L.Marker) {
-//         //     layer.setIcon(parkIcon)
-//         // }
-//         layer.bindPopup("Name: " + feature.properties.name + "<br />" + "Land Use: " 
-//         + feature.properties.landuse + "<br/>" + "Access: " + feature.properties.access), 
-        
-//         // Add Mouse-over Effect
-//         layer.on({
-//             mouseover: function(){
-//             layer.openPopup();
-//             this.setStyle({radius: 20, color: 'yellow'});
-//             },
-//             mouseout: function(){
-//             layer.closePopup();
-//             this.setStyle({color: 'blue'});
-//         }})
-// }}).addTo(map);
-
-// clust_mark.addLayer(parksPoint)
-// map.fitBounds(clust_mark.getBounds());
-
-// Addin the Control Layer -- contains the BaseMap and the Features Layers
-
-
 var features = {
-    "Burundi": BurundiBoundary,
-    "Uganda": UgandaBoundary,
-    "Nord Kivu": NordKivuBoundary, 
-    "Sud Kivu": SudKivuBoundary, 
-    "Rwanda": RwandaBoundary
+    "Burundi Population Percentage": BurundiBoundary,
+    "Uganda Population Percentage": UgandaBoundary,
+    "Nord Kivu Population Percentage": NordKivuBoundary, 
+    "Sud Kivu Population Percentage": SudKivuBoundary
 };
 
-L.control.layers(baseMaps, features, {position:'topright'}).addTo(map);
+L.control.layers(BaseMaps, features, {position:'topright'}).addTo(map);
 L.control.scale({position: 'bottomright'}).addTo(map);
-
-// // Adding Basic Interactivity
-// //Get the Coordinate of any where you click on the map
-// function onClick(evt){
-// 	alert(evt.latlng);
-// };
-// map.addEventListener('click', onClick);
