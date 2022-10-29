@@ -4,7 +4,7 @@
  */
 
 // BASEMAPS
-var map = L.map('map').setView([-1.35, 29.53], 7);
+var map = L.map('map').setView([47.80, 13.05], 12); //47.787729, 13.050236
 var topographicLayer = L.esri.basemapLayer("Topographic").addTo(map);
 var osmLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -74,12 +74,12 @@ var parksPoint = L.geoJson(parksPoint, {
         // Add Mouse-over Effect
         layer.on({
             mouseover: function(){
-            layer.openPopup();
-            this.setStyle({radius: 20, color: 'yellow'});
+                layer.openPopup();
+                this.setStyle({radius: 20, color: 'yellow'});
             },
             mouseout: function(){
-            layer.closePopup();
-            this.setStyle({color: 'blue'});
+                layer.closePopup();
+                this.setStyle({color: 'blue'});
         }})
 }}).addTo(map);
 
@@ -101,7 +101,7 @@ L.control.scale({position: 'bottomright'}).addTo(map);
 
 // Adding Basic Interactivity
 //Get the Coordinate of any where you click on the map
-function onClick(evt){
-	alert(evt.latlng);
-};
+// function onClick(evt){
+// 	alert(evt.latlng);
+// };
 map.addEventListener('click', onClick);
