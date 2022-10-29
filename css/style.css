@@ -6,7 +6,7 @@ html{
 body {
 	margin-top: 50px;
 	width: 100%;
-	height: 100%;
+	height: 90%;
 }
 
 #main {
@@ -36,10 +36,10 @@ body {
 	color: #FFF;
 	opacity: 1;
 }
-
+/*
 @media (min-height: 1024px){
 	body{
-		height: 100%;
+		height: 95%;
 	}
 }	
 
@@ -66,3 +66,4 @@ body {
 		height: 80%;
 	}
 }
+*/
